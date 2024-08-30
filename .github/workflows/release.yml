@@ -52,8 +52,8 @@ jobs:
           New-Item -ItemType directory -Path $packagingDir/bin/x64/plugins/cyber_engine_tweaks/mods/ContentTokenActivator
 
           # Copy the build artifacts
-          Copy-Item -Path ./build/release/bin/ContentTokenActivator.dll -Destination $packagingDir/red4ext/plugins/ContentTokenActivator
-          Copy-Item -Path ./build/release/bin/ContentTokenActivator.pdb -Destination $packagingDir/red4ext/plugins/ContentTokenActivator
+          Copy-Item -Path ./src/build/release/bin/ContentTokenActivator.dll -Destination $packagingDir/red4ext/plugins/ContentTokenActivator
+          Copy-Item -Path ./src/build/release/bin/ContentTokenActivator.pdb -Destination $packagingDir/red4ext/plugins/ContentTokenActivator
 
           # Copy over CET component
           Copy-Item -Path ./scripting/init.lua -Destination $packagingDir/bin/x64/plugins/cyber_engine_tweaks/mods/ContentTokenActivator
