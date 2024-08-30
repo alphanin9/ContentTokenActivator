@@ -14,8 +14,9 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{8a72e3b4-b773-416f-aa0c-fcbee424af09}</ProjectGuid>
-    <RootNamespace>RED4extExampleVisualStudio</RootNamespace>
+    <RootNamespace>ContentTokenActivator</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>ContentTokenActivator</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
