@@ -1,0 +1,85 @@
+name: Release new version
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: ./src/ContentTokenActivator.vcxproj
+  BUILD_CONFIGURATION: Release
+  BUILD_PLATFORM: x64
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Create environment variables
+      run: |
+          $versionPrefix = "refs/tags/v"
+          $version = $env:GITHUB_REF.Substring($versionPrefix.Length)
+          $commitSha = (git rev-parse --short $env:GITHUB_SHA)
+          echo "COMMIT_SHA=${commitSha}" | Out-File -FilePath $env:GITHUB_ENV -Encoding UTF8 -Append
+          echo "COMMIT_VERSION=${version}" | Out-File -FilePath $env:GITHUB_ENV -Encoding UTF8 -Append
+      
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Prepare ZIP
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+          $packagingDir = "./_packaging"
+
+          # Create the necessary directories
+          New-Item -ItemType directory -Path $packagingDir/red4ext/plugins/ContentTokenActivator
+          New-Item -ItemType directory -Path $packagingDir/bin/x64/plugins/cyber_engine_tweaks/mods/ContentTokenActivator
+
+          # Copy the build artifacts
+          Copy-Item -Path ./build/release/bin/ContentTokenActivator.dll -Destination $packagingDir/red4ext/plugins/ContentTokenActivator
+          Copy-Item -Path ./build/release/bin/ContentTokenActivator.pdb -Destination $packagingDir/red4ext/plugins/ContentTokenActivator
+
+          # Copy over CET component
+          Copy-Item -Path ./scripting/init.lua -Destination $packagingDir/bin/x64/plugins/cyber_engine_tweaks/mods/ContentTokenActivator
+
+          # Copy the license and third-party licenses
+          Copy-Item -Path ./LICENSE.md -Destination $packagingDir/red4ext/plugins/ContentTokenActivator/LICENSE.md
+          Copy-Item -Path ./THIRDPARTY_LICENSES.md -Destination $packagingDir/red4ext/plugins/ContentTokenActivator/THIRDPARTY_LICENSES.md
+          
+          # Create the ZIP file.
+          7z a ContentTokenActivator_${env:COMMIT_VERSION}.zip $packagingDir/*
+    - name: Generate hash for .zip
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        $hash = Get-FileHash -Algorithm SHA256 -Path ContentTokenActivator_${env:COMMIT_VERSION}.zip
+        $hash | Format-List
+        $only_hash = $hash | ForEach-Object { $_.Hash }
+        echo "BUILD_SHA256=${only_hash}" | Out-File -FilePath $env:GITHUB_ENV -Encoding UTF8 -Append
+
+    - name: Upload build to releases
+      uses: softprops/action-gh-release@v2.0.4
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      with:
+        append_body: true
+        body: |
+          ### SHA256 of release:
+          - ${{env.BUILD_SHA256}}
+        files: | 
+          ContentTokenActivator_${{env.COMMIT_VERSION }}.zip

@@ -1,22 +1,18 @@
-# RED4ext.Example using Visual Studio
+# Content token activator for CP2077
 
-An example of a RED4ext plugin using Visual Studio.
+Helps with issues regarding quest activation (for example, SQ026 AKA the Clouds takeover questline being a complete mess).
 
-## Build instructions
+# Requirements
 
-### Steps
+- Cyber Engine Tweaks
+- RED4ext
 
-1. Download and install [Visual Studio 2022 Community Edition](https://www.visualstudio.com/) or a higher version.
-2. Clone this repository.
-3. Clone the dependencies (`git submodule update --init --recursive`).
-4. Open the solution (**RED4ext.Example.VisualStudio.sln**).
-5. Build the project (the artifacts are located in `build/{debug|release}` directory).
+# Usage
 
-**Notes**:
+```
+ContentHandler.ActivateToken()
+```
 
-* The plugin has to be a 64-bit library. That means all required libraries have to be compiled in 64-bit and the compiler has to support 64-bit.
-* Make sure you have the latest SDK by updating it using the following commands:
-  * `cd deps/red4ext.sdk`
-  * `git pull` / `git fetch`
-  * `git checkout master`
-* You can also generate the projects from command line, see the **build.yml** in **.github/workflows/build.yml**.
+Alternatively, use the GUI the Cyber Engine Tweaks script provides.
+
+Note that by default there is no Redscript import for ContentHandler, as Cyber Engine Tweaks does not require it.
